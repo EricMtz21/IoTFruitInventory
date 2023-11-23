@@ -1,10 +1,9 @@
-import "./App.css"
 import { db } from "./utils/firebase"
 import { onValue, ref } from "firebase/database"
 import React, { useEffect, useState } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Outlet, Link } from "react-router-dom"
-import { DAPage } from "./components/graphs"
+import Chart from "react-google-charts"
 
 function App() {
   return (
@@ -12,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<NavBar />}>
           <Route index element={<Content />} />
-          <Route path="graphs" element={<DAPage />} />
+          <Route path="graphs" element={<MyChar />} />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -161,6 +160,60 @@ function Content() {
       </div>
       <Outlet />
     </div>
+  )
+}
+
+function loadGoogleCharts() {
+  return new Promise((resolve) => {
+    // Cargar la API de Google Charts
+    window.google.charts.load("current", { packages: ["corechart"] })
+
+    // Establecer un callback para ejecutar cuando se carga la API de Google Charts
+    window.google.charts.setOnLoadCallback(() => {
+      resolve()
+    })
+  })
+}
+
+function MyChar() {
+  useEffect(() => {
+    // Llamar al servicio para cargar Google Charts
+    loadGoogleCharts().then(() => {
+      // Ahora `google` está disponible y puedes usarlo para dibujar el gráfico
+      drawChart()
+    })
+  }, [])
+
+  function drawChart() {
+    // Create the data table.
+    var data = new window.google.visualization.DataTable()
+
+    data.addColumn("string", "Fruit")
+    data.addColumn("number", "Quantity")
+    data.addRows([
+      ["Apple", 7],
+      ["Banana", 5],
+      ["Carrot", 10],
+      ["Broccoli", 3],
+      ["Orange", 2],
+    ])
+
+    // Set chart options
+    var options = {
+      title: "Fruits and Vegetables picked",
+      width: 700,
+      height: 500,
+    }
+
+    // Instantiate and draw our chart, passing in some options.
+    var chart = new window.google.visualization.PieChart(
+      document.getElementById("chart_div")
+    )
+    chart.draw(data, options)
+  }
+
+  return (
+    <div id="chart_div" className="chart-div"></div>
   )
 }
 

@@ -41,7 +41,6 @@ function App() {
         setTotalCarrots(carrotCount)
         setTotalOranges(orangesCount)
 
-        // Mover setProduct aquí fuera del bucle
         setProduct(Object.values(data))
       }
     })
@@ -122,7 +121,6 @@ function Content() {
         setTotalCarrots(carrotCount)
         setTotalOranges(orangesCount)
 
-        // Mover setProduct aquí fuera del bucle
         setProduct(Object.values(data))
       }
     })
@@ -163,28 +161,6 @@ function Content() {
           />
         </div>
       </div>
-      <div className="broccoli">
-        <h1>Broccoli</h1>
-        <h1>{totalBroccoli}</h1>
-        <div className="fruit-container">
-          <img
-            src={process.env.PUBLIC_URL + "/imgs/brocoli.png"}
-            alt="Logo"
-            className="img-fruit"
-          />
-        </div>
-      </div>
-      <div className="orange">
-        <h1>Orange</h1>
-        <h1>{totalOranges}</h1>
-        <div className="fruit-container">
-          <img
-            src={process.env.PUBLIC_URL + "/imgs/orange.png"}
-            alt="Logo"
-            className="img-fruit"
-          />
-        </div>
-      </div>
       <Outlet />
     </div>
   )
@@ -193,20 +169,16 @@ function Content() {
 const Chart = ({
   totalApples,
   totalBananas,
-  totalBroccoli,
   totalCarrots,
-  totalOranges,
 }) => {
   const data = {
-    labels: ["Apples", "Bananas", "Broccoli", "Carrots", "Oranges"],
+    labels: ["Apples", "Bananas", "Carrots"],
     datasets: [
       {
         data: [
           totalApples,
-          totalBananas,
-          totalBroccoli,
+          totalBananas,   
           totalCarrots,
-          totalOranges,
         ],
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
@@ -228,7 +200,7 @@ const Chart = ({
   };
 
   const options = {
-    // Otras opciones específicas del gráfico de pastel, si las necesitas
+    
   };
 
   return (

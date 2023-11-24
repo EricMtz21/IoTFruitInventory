@@ -3,15 +3,67 @@ import { onValue, ref } from "firebase/database"
 import React, { useEffect, useState } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Outlet, Link } from "react-router-dom"
-import Chart from "react-google-charts"
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS } from 'chart.js/auto';
+
 
 function App() {
+  const [product, setProduct] = useState([])
+  const [totalApples, setTotalApples] = useState(0)
+  const [totalBananas, setTotalBananas] = useState(0)
+  const [totalBroccoli, setTotalBroccoli] = useState(0)
+  const [totalCarrots, setTotalCarrots] = useState(0)
+  const [totalOranges, setTotalOranges] = useState(0)
+
+  useEffect(() => {
+    const query = ref(db, "productos")
+    return onValue(query, (snapshot) => {
+      const data = snapshot.val()
+
+      if (snapshot.exists()) {
+        let applesCount = 0
+        let bananasCount = 0
+        let broccoliCount = 0
+        let carrotCount = 0
+        let orangesCount = 0
+
+        Object.values(data).forEach((product) => {
+          applesCount += product.apples || 0
+          bananasCount += product.bananas || 0
+          broccoliCount += product.broccoli || 0
+          carrotCount += product.carrots || 0
+          orangesCount += product.orange || 0
+        })
+
+        setTotalApples(applesCount)
+        setTotalBananas(bananasCount)
+        setTotalBroccoli(broccoliCount)
+        setTotalCarrots(carrotCount)
+        setTotalOranges(orangesCount)
+
+        // Mover setProduct aquí fuera del bucle
+        setProduct(Object.values(data))
+      }
+    })
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<NavBar />}>
           <Route index element={<Content />} />
-          <Route path="graphs" element={<MyChar />} />
+          <Route
+            path="graphs"
+            element={
+              <Chart
+                totalApples={totalApples}
+                totalBananas={totalBananas}
+                totalBroccoli={totalBroccoli}
+                totalCarrots={totalCarrots}
+                totalOranges={totalOranges}
+              />
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -43,6 +95,7 @@ function Content() {
   const [totalBroccoli, setTotalBroccoli] = useState(0)
   const [totalCarrots, setTotalCarrots] = useState(0)
   const [totalOranges, setTotalOranges] = useState(0)
+
   useEffect(() => {
     const query = ref(db, "productos")
     return onValue(query, (snapshot) => {
@@ -50,53 +103,27 @@ function Content() {
 
       if (snapshot.exists()) {
         let applesCount = 0
-
-        Object.values(data).forEach((product) => {
-          applesCount += product.apples || 0
-          setProduct((productos) => [...productos, product])
-        })
-
-        setTotalApples(applesCount)
-      }
-      if (snapshot.exists()) {
         let bananasCount = 0
-
-        Object.values(data).forEach((product) => {
-          bananasCount += product.bananas || 0
-          setProduct((productos) => [...productos, product])
-        })
-
-        setTotalBananas(bananasCount)
-      }
-      if (snapshot.exists()) {
         let broccoliCount = 0
-
-        Object.values(data).forEach((product) => {
-          broccoliCount += product.broccoli || 0
-          setProduct((productos) => [...productos, product])
-        })
-
-        setTotalBroccoli(broccoliCount)
-      }
-      if (snapshot.exists()) {
         let carrotCount = 0
-
-        Object.values(data).forEach((product) => {
-          carrotCount += product.carrots || 0
-          setProduct((productos) => [...productos, product])
-        })
-
-        setTotalCarrots(carrotCount)
-      }
-      if (snapshot.exists()) {
         let orangesCount = 0
 
         Object.values(data).forEach((product) => {
+          applesCount += product.apples || 0
+          bananasCount += product.bananas || 0
+          broccoliCount += product.broccoli || 0
+          carrotCount += product.carrots || 0
           orangesCount += product.orange || 0
-          setProduct((productos) => [...productos, product])
         })
 
+        setTotalApples(applesCount)
+        setTotalBananas(bananasCount)
+        setTotalBroccoli(broccoliCount)
+        setTotalCarrots(carrotCount)
         setTotalOranges(orangesCount)
+
+        // Mover setProduct aquí fuera del bucle
+        setProduct(Object.values(data))
       }
     })
   }, [])
@@ -163,58 +190,52 @@ function Content() {
   )
 }
 
-function loadGoogleCharts() {
-  return new Promise((resolve) => {
-    // Cargar la API de Google Charts
-    window.google.charts.load("current", { packages: ["corechart"] })
+const Chart = ({
+  totalApples,
+  totalBananas,
+  totalBroccoli,
+  totalCarrots,
+  totalOranges,
+}) => {
+  const data = {
+    labels: ["Apples", "Bananas", "Broccoli", "Carrots", "Oranges"],
+    datasets: [
+      {
+        data: [
+          totalApples,
+          totalBananas,
+          totalBroccoli,
+          totalCarrots,
+          totalOranges,
+        ],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
-    // Establecer un callback para ejecutar cuando se carga la API de Google Charts
-    window.google.charts.setOnLoadCallback(() => {
-      resolve()
-    })
-  })
-}
-
-function MyChar() {
-  useEffect(() => {
-    // Llamar al servicio para cargar Google Charts
-    loadGoogleCharts().then(() => {
-      // Ahora `google` está disponible y puedes usarlo para dibujar el gráfico
-      drawChart()
-    })
-  }, [])
-
-  function drawChart() {
-    // Create the data table.
-    var data = new window.google.visualization.DataTable()
-
-    data.addColumn("string", "Fruit")
-    data.addColumn("number", "Quantity")
-    data.addRows([
-      ["Apple", 7],
-      ["Banana", 5],
-      ["Carrot", 10],
-      ["Broccoli", 3],
-      ["Orange", 2],
-    ])
-
-    // Set chart options
-    var options = {
-      title: "Fruits and Vegetables picked",
-      width: 700,
-      height: 500,
-    }
-
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new window.google.visualization.PieChart(
-      document.getElementById("chart_div")
-    )
-    chart.draw(data, options)
-  }
+  const options = {
+    // Otras opciones específicas del gráfico de pastel, si las necesitas
+  };
 
   return (
-    <div id="chart_div" className="chart-div"></div>
-  )
-}
+    <div className="chart">
+      <Pie data={data} options={options} />
+    </div>
+  );
+};
 
 export default App

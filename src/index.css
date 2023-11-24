@@ -118,3 +118,8 @@ li a {
   background-color: var(--color-apple);
   height: 90vh;
 }
+
+.chart {
+  width: 50vw;
+  height: 50vh;
+}
